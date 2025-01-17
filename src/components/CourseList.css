@@ -1,0 +1,5 @@
+.subject-dropdown {
+    max-height: 200px; /* Set the maximum height of the dropdown */
+    overflow-y: auto; /* Enable vertical scrolling if content exceeds height */
+    display: block; /* Ensure the dropdown displays properly */
+}
