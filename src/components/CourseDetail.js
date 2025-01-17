@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { getCourseById, getProfessorsByCourseId } from "../services/courseService.js";
+import { getCourseById, getProfessorsByCourseId, getAverageGradeForCourse } from "../services/courseService.js";
 import { Link } from "react-router-dom";
 
 const tagIcon = "/resources/tag.png";
@@ -9,6 +9,7 @@ const CourseDetail = ({ darkMode }) => {
     const { courseId } = useParams(); // Get course ID from URL
     const [course, setCourse] = useState(null);
     const [professors, setProfessors] = useState([]); // State for professors
+    const [averageGrade, setAverageGrade] = useState(null); // State for average grade
 
     useEffect(() => {
         const fetchCourseDetails = async () => {
@@ -18,6 +19,10 @@ const CourseDetail = ({ darkMode }) => {
             // Fetch professors who taught this course
             const professorsData = await getProfessorsByCourseId(courseId);
             setProfessors(professorsData);
+
+            // Fetch the average grade
+            const averageGradeData = await getAverageGradeForCourse(courseId);
+            setAverageGrade(averageGradeData);
         };
         fetchCourseDetails();
     }, [courseId]);
@@ -118,6 +123,13 @@ const CourseDetail = ({ darkMode }) => {
                             }`}
                         >
                             <h3 className="text-xl font-semibold">Additional Information</h3>
+                            {averageGrade ? (
+                                <p>
+                                    <strong>Average Grade:</strong> {averageGrade}
+                                </p>
+                            ) : (
+                                <p>Loading average grade...</p>
+                            )}
                             <p>
                                 Here you can add content for the right side of the page, such as notes, related links, or
                                 other components. This box is independent of the table and main content.
@@ -131,6 +143,7 @@ const CourseDetail = ({ darkMode }) => {
 };
 
 export default CourseDetail;
+
 
 
 

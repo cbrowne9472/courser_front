@@ -14,6 +14,16 @@ const API_BASE_URL = "http://localhost:8080/home";
 // By adding export, you're making this function part of the module's public API, so other files can import and use it.
 // Without export, this function would only be accessible within the same file.
 
+export const getAverageGradeForCourse = async (courseId) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/course/${courseId}/average-grade`);
+        return response.data; // The average grade as a string
+    } catch (error) {
+        console.error("Error fetching average grade for course:", error);
+        return null; // Return null or a default value
+    }
+};
+
 export const getCommentsByCourseAndProfessor = async (courseId, professorId) => {
     try {
         const response = await axios.get(
