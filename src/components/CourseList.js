@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { getCourses, getSubjects } from "../services/courseService.js";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Link } from "react-router-dom";
+import Select from "react-select";
+import makeAnimated from "react-select/animated";
+
+const animatedComponents = makeAnimated();
 
 const CourseList = ({ darkMode }) => {
     const [courses, setCourses] = useState([]);
@@ -39,7 +43,7 @@ const CourseList = ({ darkMode }) => {
         const initializeData = async () => {
             await fetchCourses(true);
             const allSubjects = await getSubjects();
-            setSubjects(allSubjects);
+            setSubjects(allSubjects.map((subject) => ({ value: subject, label: subject })));
         };
         initializeData();
     }, []);
@@ -50,49 +54,135 @@ const CourseList = ({ darkMode }) => {
         fetchCourses(true, query, sortBy, order, selectedSubject);
     };
 
-    const handleSort = (event) => {
-        const [field, direction] = event.target.value.split("-");
+    const handleSort = (option) => {
+        const [field, direction] = option.value.split("-");
         setSortBy(field);
         setOrder(direction);
         fetchCourses(true, searchQuery, field, direction, selectedSubject);
     };
 
-    const handleSubjectChange = (event) => {
-        const subject = event.target.value;
+    const handleSubjectChange = (option) => {
+        const subject = option ? option.value : "";
         setSelectedSubject(subject);
         fetchCourses(true, searchQuery, sortBy, order, subject);
     };
 
     return (
-        <div className={`${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"} min-h-screen`}>
+        <div
+            className={`min-h-screen transition-colors duration-500 ${
+                darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
+            }`}
+        >
             <div className="container mx-auto mt-6">
                 <div className="max-w-3xl mx-auto">
                     <input
                         type="text"
-                        className={`w-full px-4 py-2 mb-4 rounded border ${darkMode ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300 text-black"}`}
+                        className={`w-full px-4 py-2 mb-4 rounded border transition-colors duration-500 ${
+                            darkMode ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300 text-black"
+                        }`}
                         placeholder="Search by title..."
                         value={searchQuery}
                         onChange={handleSearch}
                     />
-                    <select
-                        className={`w-full px-4 py-2 mb-4 rounded border ${darkMode ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300 text-black"}`}
+                    <Select
+                        components={animatedComponents}
+                        options={[
+                            { value: "courseNumber-asc", label: "Course Number (Low-High)" },
+                            { value: "courseNumber-desc", label: "Course Number (High-Low)" },
+                            { value: "subject-asc", label: "Subject (A-Z)" },
+                            { value: "subject-desc", label: "Subject (Z-A)" },
+                        ]}
                         onChange={handleSort}
-                    >
-                        <option value="courseNumber-asc">Course Number (Low-High)</option>
-                        <option value="courseNumber-desc">Course Number (High-Low)</option>
-                        <option value="subject-asc">Subject (A-Z)</option>
-                        <option value="subject-desc">Subject (Z-A)</option>
-                    </select>
-                    <select
-                        className={`w-full px-4 py-2 mb-4 rounded border ${darkMode ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300 text-black"}`}
+                        className="mb-4"
+                        styles={{
+                            control: (base) => ({
+                                ...base,
+                                background: darkMode ? "#374151" : "#ffffff",
+                                color: darkMode ? "#ffffff" : "#000000",
+                                borderColor: darkMode ? "#4b5563" : "#d1d5db",
+                                transition: "background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease",
+                            }),
+                            menu: (base) => ({
+                                ...base,
+                                background: darkMode ? "#374151" : "#ffffff",
+                                color: darkMode ? "#ffffff" : "#000000",
+                                transition: "background-color 0.5s ease, color 0.5s ease",
+                            }),
+                            singleValue: (base) => ({
+                                ...base,
+                                color: darkMode ? "#ffffff" : "#000000",
+                                transition: "color 0.5s ease",
+                            }),
+                            option: (base, state) => ({
+                                ...base,
+                                background: state.isFocused
+                                    ? darkMode
+                                        ? "#4b5563"
+                                        : "#e5e7eb"
+                                    : darkMode
+                                        ? "#374151"
+                                        : "#ffffff",
+                                color: state.isFocused
+                                    ? darkMode
+                                        ? "#ffffff"
+                                        : "#000000"
+                                    : darkMode
+                                        ? "#ffffff"
+                                        : "#000000",
+                                transition: "background-color 0.5s ease, color 0.5s ease",
+                            }),
+                        }}
+                    />
+
+
+                    <Select
+                        components={animatedComponents}
+                        options={subjects}
                         onChange={handleSubjectChange}
-                        value={selectedSubject}
-                    >
-                        <option value="">All Subjects</option>
-                        {subjects.map((subject) => (
-                            <option key={subject} value={subject}>{subject}</option>
-                        ))}
-                    </select>
+                        isClearable
+                        placeholder="Select Subject"
+                        className="mb-4"
+                        styles={{
+                            control: (base) => ({
+                                ...base,
+                                background: darkMode ? "#374151" : "#ffffff",
+                                color: darkMode ? "#ffffff" : "#000000",
+                                borderColor: darkMode ? "#4b5563" : "#d1d5db",
+                                transition: "background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease",
+                            }),
+                            menu: (base) => ({
+                                ...base,
+                                background: darkMode ? "#374151" : "#ffffff",
+                                color: darkMode ? "#ffffff" : "#000000",
+                                transition: "background-color 0.5s ease, color 0.5s ease",
+                            }),
+                            singleValue: (base) => ({
+                                ...base,
+                                color: darkMode ? "#ffffff" : "#000000",
+                                transition: "color 0.5s ease",
+                            }),
+                            option: (base, state) => ({
+                                ...base,
+                                background: state.isFocused
+                                    ? darkMode
+                                        ? "#4b5563"
+                                        : "#e5e7eb"
+                                    : darkMode
+                                        ? "#374151"
+                                        : "#ffffff",
+                                color: state.isFocused
+                                    ? darkMode
+                                        ? "#ffffff"
+                                        : "#000000"
+                                    : darkMode
+                                        ? "#ffffff"
+                                        : "#000000",
+                                transition: "background-color 0.5s ease, color 0.5s ease",
+                            }),
+                        }}
+                    />
+
+
                 </div>
                 <InfiniteScroll
                     dataLength={courses.length}
@@ -103,8 +193,10 @@ const CourseList = ({ darkMode }) => {
                     <div className="max-w-3xl mx-auto">
                         {courses.map((course, index) => (
                             <div
-                                key={`${course.id}-${index}`} // Composite key: combines ID with index
-                                className={`p-4 mb-4 rounded shadow ${darkMode ? "bg-gray-800 text-white" : "bg-white text-black"}`}
+                                key={`${course.id}-${index}`}
+                                className={`p-4 mb-4 rounded shadow transition-colors duration-500 ${
+                                    darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+                                }`}
                             >
                                 <h5 className="font-bold">
                                     <Link to={`/courses/${course.id}`} className="hover:underline">
@@ -115,13 +207,11 @@ const CourseList = ({ darkMode }) => {
                                 <p className="text-sm">Subject: {course.subject}</p>
                             </div>
                         ))}
-
                     </div>
                 </InfiniteScroll>
             </div>
         </div>
     );
-
 };
 
 export default CourseList;

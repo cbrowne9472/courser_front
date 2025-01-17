@@ -6,6 +6,7 @@ html, body {
     @apply bg-gray-100 text-black; /* Light mode */
     height: 100%; /* Ensure it covers the full viewport */
     margin: 0; /* Remove any default browser margins */
+    transition: background-color 0.5s ease, color 0.5s ease; /* Smooth transition */
 }
 
 html.dark-mode, body.dark-mode {

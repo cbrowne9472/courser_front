@@ -47,9 +47,10 @@ const App = () => {
 
 
     return (
-        <div className={`min-h-screen ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
+        <div className={`min-h-screen transition-colors duration-500 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
+
         <Router>
-            <nav className={`flex items-center justify-between px-6 py-4 ${darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-800"}`}>
+            <nav className={`flex items-center justify-between px-6 py-4 transition-colors duration-500 ${darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-800"}`}>
                 <div className="flex items-center space-x-4">
                     <a className="font-bold text-lg" href="/">Course Management</a>
                     <ul className="flex space-x-4">
@@ -75,7 +76,7 @@ const App = () => {
                     </button>
                 </div>
             </nav>
-            <div className={`container mx-auto mt-6 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
+            <div className={`container mx-auto mt-6 transition-colors duration-500 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
                 <Routes>
                     <Route path="/" element={<h3>Welcome to Course Management</h3>} />
                     <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />

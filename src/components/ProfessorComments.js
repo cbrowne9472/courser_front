@@ -56,7 +56,7 @@ const ProfessorComments = () => {
 
     return (
         <div className="container mt-4">
-            <h2 className="mb-4">Comments for {professorName} from {comments[0].courseName}</h2>
+            <h2 className="mb-4">Comments for {professorName} for {comments[0].courseName}</h2>
             {comments.length > 0 ? (
                 comments.map((comment, index) => (
                     <div key={index} className="card mb-3 shadow-sm">
