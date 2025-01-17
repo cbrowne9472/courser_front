@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+    @apply bg-gray-100 text-black; /* Light mode */
+    height: 100%; /* Ensure it covers the full viewport */
+    margin: 0; /* Remove any default browser margins */
+}
+
+html.dark-mode, body.dark-mode {
+    @apply bg-gray-900 text-white; /* Dark mode */
+}
+
+
+
