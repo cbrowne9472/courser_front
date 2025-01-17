@@ -101,8 +101,11 @@ const CourseList = ({ darkMode }) => {
                     loader={<h4>Loading...</h4>}
                 >
                     <div className="max-w-3xl mx-auto">
-                        {courses.map((course) => (
-                            <div key={course.id} className={`p-4 mb-4 rounded shadow ${darkMode ? "bg-gray-800 text-white" : "bg-white text-black"}`}>
+                        {courses.map((course, index) => (
+                            <div
+                                key={`${course.id}-${index}`} // Composite key: combines ID with index
+                                className={`p-4 mb-4 rounded shadow ${darkMode ? "bg-gray-800 text-white" : "bg-white text-black"}`}
+                            >
                                 <h5 className="font-bold">
                                     <Link to={`/courses/${course.id}`} className="hover:underline">
                                         {course.title}
@@ -112,6 +115,7 @@ const CourseList = ({ darkMode }) => {
                                 <p className="text-sm">Subject: {course.subject}</p>
                             </div>
                         ))}
+
                     </div>
                 </InfiniteScroll>
             </div>

@@ -1,38 +1,44 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { getCommentsByProfessorId } from "../services/courseService.js";
+import { useParams, useLocation } from "react-router-dom"; // Added useLocation for query params
+import { getCommentsByCourseAndProfessor } from "../services/courseService.js";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 // Update with public folder paths
 const starIcon = "/resources/gmu.png";
 const grayStarIcon = "/resources/gmu_gray.png";
-const difficultyIcon = "/resources/fire.png"; // New difficulty icon
-const grayDifficultyIcon = "/resources/fire_gray.png"; // New gray difficulty icon
+const difficultyIcon = "/resources/fire.png"; // Difficulty icon
+const grayDifficultyIcon = "/resources/fire_gray.png"; // Gray difficulty icon
 
 const ProfessorComments = () => {
     const { professorId } = useParams(); // Get professor ID from URL
+    const location = useLocation(); // Get query params
+    const queryParams = new URLSearchParams(location.search);
+    const courseId = queryParams.get("courseId"); // Get courseId from query params
+
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [professorName, setProfessorName] = useState("");
+    const [professorName, setProfessorName] = useState("Unknown Professor");
 
     useEffect(() => {
         const fetchComments = async () => {
             try {
-                const data = await getCommentsByProfessorId(professorId);
-                const sortedComments = (data.comments || []).sort(
-                    (a, b) => new Date(b.date) - new Date(a.date) // Newest to oldest
-                );
-                setComments(sortedComments);
+                // Fetch comments by course and professor
+                const data = await getCommentsByCourseAndProfessor(courseId, professorId);
+
+                console.log("API Response Data:", data); // Log API response
+
+                // Extract professorName and comments
                 setProfessorName(data.professorName || "Unknown Professor");
+                setComments(data.comments || []);
             } catch (error) {
-                console.error("Error fetching professor comments:", error);
+                console.error("Error fetching comments:", error);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchComments();
-    }, [professorId]);
+    }, [professorId, courseId]);
 
     if (loading) return <p>Loading comments...</p>;
 
@@ -50,7 +56,7 @@ const ProfessorComments = () => {
 
     return (
         <div className="container mt-4">
-            <h2 className="mb-4">Comments for {professorName}</h2>
+            <h2 className="mb-4">Comments for {professorName} from {comments[0].courseName}</h2>
             {comments.length > 0 ? (
                 comments.map((comment, index) => (
                     <div key={index} className="card mb-3 shadow-sm">
@@ -70,15 +76,15 @@ const ProfessorComments = () => {
                                     </div>
                                 </div>
                             </div>
-                            <p className="mt-2">{comment.comment}</p>
+                            <p className="mt-2">{comment.comment || "No comment provided"}</p>
                             <p className="text-end text-muted small">
-                                Taught by {professorName}
+                                Taught in {comment.courseName || "Unknown Course"} by {professorName}
                             </p>
                         </div>
                     </div>
                 ))
             ) : (
-                <div className="alert alert-info">No comments found for this professor.</div>
+                <div className="alert alert-info">No comments found for this professor{courseId ? " in this course" : ""}.</div>
             )}
         </div>
     );
