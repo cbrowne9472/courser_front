@@ -1,31 +1,69 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { getCourseById, getProfessorsByCourseId, getAverageGradeForCourse } from "../services/courseService.js";
+import {
+    getCourseById,
+    getProfessorsByCourseId,
+    getAverageGradeForCourse,
+    getAverageGradesByProfessor,
+    getAverageRatingFromCourse
+} from "../services/courseService.js";
 import { Link } from "react-router-dom";
+import { Rating } from "flowbite-react";
+import Chart from 'chart.js/auto';
+import { BarChart } from "./BarGraph.js";
+import { Progress } from "flowbite-react";
 
-const tagIcon = "/resources/tag.png";
+// Import both icons
+const tagIconLight = "/resources/tag.png";
+const tagIconDark = "/resources/black_tag.png";
 
 const CourseDetail = ({ darkMode }) => {
-    const { courseId } = useParams(); // Get course ID from URL
+    const { courseId } = useParams();
     const [course, setCourse] = useState(null);
-    const [professors, setProfessors] = useState([]); // State for professors
-    const [averageGrade, setAverageGrade] = useState(null); // State for average grade
+    const [professors, setProfessors] = useState([]);
+    const [sortedProfessors, setSortedProfessors] = useState([]);
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+    const [averageGrade, setAverageGrade] = useState(null);
+    const [averageRating, setAverageRating] = useState(null);
 
     useEffect(() => {
         const fetchCourseDetails = async () => {
             const courseData = await getCourseById(courseId);
             setCourse(courseData);
 
-            // Fetch professors who taught this course
             const professorsData = await getProfessorsByCourseId(courseId);
-            setProfessors(professorsData);
+            const averageGrades = await getAverageGradesByProfessor(courseId);
 
-            // Fetch the average grade
+            const mergedData = professorsData.map((professor) => {
+                const grade = averageGrades.find((item) => item.professorName === professor.name);
+                return { ...professor, avgGrade: grade ? grade.averageGrade : "N/A" };
+            });
+
+            setProfessors(mergedData);
+            setSortedProfessors(mergedData);
+
             const averageGradeData = await getAverageGradeForCourse(courseId);
             setAverageGrade(averageGradeData);
+
+            const ratingData = await getAverageRatingFromCourse(courseId);
+            setAverageRating(ratingData);
         };
         fetchCourseDetails();
     }, [courseId]);
+
+    const handleSort = (key) => {
+        const direction = sortConfig.key === key && sortConfig.direction === "asc" ? "desc" : "asc";
+        setSortConfig({ key, direction });
+
+        const sorted = [...professors].sort((a, b) => {
+            if (direction === "asc") {
+                return a[key] > b[key] ? 1 : -1;
+            } else {
+                return a[key] < b[key] ? 1 : -1;
+            }
+        });
+        setSortedProfessors(sorted);
+    };
 
     if (!course) {
         return <p>Loading course details...</p>;
@@ -38,90 +76,197 @@ const CourseDetail = ({ darkMode }) => {
             }`}
         >
             <div className="container mx-auto mt-6">
-                {/* Course Details Section */}
-                <div className="mb-6 transition-colors duration-150">
-                    <h2 className="text-2xl font-bold mb-4">{course.title}</h2>
-                    <p><strong>Rating:</strong> {course.rating}</p>
-                    <p><strong>Course ID:</strong> {course.id}</p>
-                    <p>{course.description}</p>
-                    <p>{course.additionalInfo}</p>
-                </div>
+                {/* Course Information Card */}
+                <div className={`flex`}>
+                    <div
+                        className={`w-2/3 p-6 mb-6 rounded shadow-md ${
+                            darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+                        }`}
+                    >
+                        <h2 className="text-2xl font-bold mb-4">{course.title}</h2>
+                        <p className="mb-2"><strong>Rating:</strong> {course.rating}</p>
+                        <p className="mb-2"><strong>Course ID:</strong> {course.id}</p>
+                        <p className="mb-2">{course.description}</p>
+                        <p>{course.additionalInfo}</p>
+                    </div>
 
-                {/* Main Content Section: Table and Additional Info */}
+                    {/* Chart Section */}
+                    <div className="w-1/3 pl-4">
+                        {/* Custom Progress Bar */}
+                        {averageRating ? (
+                            <div className="flex flex-col items-start mb-4"> {/* Added mb-4 here */}
+                                <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-2 flex items-center">
+                                    {/* Rating Label */}
+                                    <svg
+                                        className="w-4 h-4 mr-2"
+                                        fill="none"
+                                        stroke={darkMode ? "red" : "black"}
+                                        strokeWidth={2}
+                                        viewBox="0 0 24 24"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M5 12h14M12 5l7 7-7 7"
+                                        ></path>
+                                    </svg>
+                                    RATING
+                                </div>
+                                <div className="relative w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+                                    <div
+                                        className="absolute top-0 left-0 h-4 rounded-full"
+                                        style={{
+                                            width: `${(averageRating.avgRating / 5) * 100}%`,
+                                            backgroundColor: darkMode ? "rgba(255, 69, 58, 1)" : "rgba(54, 162, 235, 1)",
+                                        }}
+                                    ></div>
+                                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 text-sm font-bold text-white dark:text-gray-900">
+                                        {averageRating.avgRating.toFixed(2)}/5
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <p>Loading average rating...</p>
+                        )}
+
+
+                        {averageRating ? (
+                            <BarChart ratingData={averageRating} darkMode={darkMode} />
+                        ) : (
+                            <p>Loading chart...</p>
+                        )}
+                        
+                        {averageRating ? (
+                            <>
+                                {/* Custom Progress Bar for Difficulty */}
+                                <div className="flex flex-col items-start mb-4 mt-4">
+                                    <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-2 flex items-center">
+                                        <svg
+                                            className="w-4 h-4 mr-2"
+                                            fill="none"
+                                            stroke={darkMode ? "orange" : "black"}
+                                            strokeWidth={2}
+                                            viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M5 12h14M12 5l7 7-7 7"
+                                            ></path>
+                                        </svg>
+                                        DIFFICULTY
+                                    </div>
+                                    <div className="relative w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+                                        <div
+                                            className="absolute top-0 left-0 h-4 rounded-full"
+                                            style={{
+                                                width: `${(averageRating.avgDifficulty / 5) * 100}%`,
+                                                backgroundColor: darkMode ? "rgba(255, 165, 0, 1)" : "rgba(255, 99, 132, 1)",
+                                            }}
+                                        ></div>
+                                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 text-sm font-bold text-white dark:text-gray-900">
+                                            {averageRating.avgDifficulty.toFixed(2)}/5
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Bar Chart for Difficulty */}
+                                <BarChart
+                                    ratingData={{
+                                        ratings: averageRating.difficultyCounts,
+                                    }}
+                                    darkMode={darkMode}
+                                />
+                            </>
+                        ) : (
+                            <p>Loading difficulty chart...</p>
+                        )}
+                    </div>
+                </div>
                 <div className="flex mt-6">
-                    {/* Left Section: Table */}
                     <div className="w-2/3 pr-4">
                         <h3 className="text-xl font-semibold mb-4">Professors Who Taught This Course:</h3>
-                        {professors.length === 0 ? (
+                        {sortedProfessors.length === 0 ? (
                             <p>No professors have taught this course yet.</p>
                         ) : (
-                            <table
-                                className={`table-auto w-full mt-4 transition-colors duration-150 ${
-                                    darkMode ? "text-white" : "text-black"
-                                }`}
-                            >
-                                <thead>
-                                <tr
-                                    className={`transition-colors duration-500 ${
-                                        darkMode ? "bg-gray-800" : "bg-gray-300"
+                            <div className="max-h-80 overflow-y-auto border border-gray-300 rounded">
+                                <table
+                                    className={`table-auto w-full mt-4 ${
+                                        darkMode ? "text-white" : "text-black"
                                     }`}
                                 >
-                                    <th className="px-4 py-2">Name</th>
-                                    <th className="px-4 py-2">Avg Rating</th>
-                                    <th className="px-4 py-2">Avg Difficulty</th>
-                                    <th className="px-4 py-2">Profile</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {professors.map((professor, index) => (
-                                    <tr
-                                        key={professor.id}
-                                        className={`transition-colors duration-500 ${
-                                            index % 2 === 0
-                                                ? darkMode
-                                                    ? "bg-gray-700"
-                                                    : "bg-gray-100"
-                                                : ""
-                                        }`}
-                                    >
-                                        <td className="px-4 py-2">
-                                            <Link
-                                                to={`/professor/${professor.id}?courseId=${courseId}`}
-                                                className="hover:underline flex items-center"
-                                            >
-                                                {professor.name}
-                                            </Link>
-                                        </td>
-                                        <td className="px-4 py-2">{professor.avgRating}</td>
-                                        <td className="px-4 py-2">{professor.avgDifficulty}</td>
-                                        <td className="px-4 py-2">
-                                            <a
-                                                href={professor.link}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="ml-2"
-                                            >
-                                                <img
-                                                    src={tagIcon}
-                                                    alt="Rate My Professors"
-                                                    className="inline-block h-5 w-5"
-                                                />
-                                            </a>
-                                        </td>
+                                    <thead>
+                                    <tr className={`${darkMode ? "bg-gray-800" : "bg-gray-300"}`}>
+                                        <th className="px-4 py-2">Name</th>
+                                        <th
+                                            className="px-4 py-2 cursor-pointer hover:text-blue-500"
+                                            onClick={() => handleSort("avgRating")}
+                                        >
+                                            Avg Rating {sortConfig.key === "avgRating" && (sortConfig.direction === "asc" ? "▲" : "▼")}
+                                        </th>
+                                        <th
+                                            className="px-4 py-2 cursor-pointer hover:text-blue-500"
+                                            onClick={() => handleSort("avgDifficulty")}
+                                        >
+                                            Avg Difficulty {sortConfig.key === "avgDifficulty" && (sortConfig.direction === "asc" ? "▲" : "▼")}
+                                        </th>
+                                        <th className="px-4 py-2">Profile</th>
+                                        <th className="px-4 py-2">Avg Grade</th>
                                     </tr>
-                                ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                    {sortedProfessors.map((professor, index) => (
+                                        <tr
+                                            key={professor.id}
+                                            className={index % 2 === 0 ? (darkMode ? "bg-gray-700" : "bg-gray-100") : ""}
+                                        >
+                                            <td className="px-4 py-2">
+                                                <Link
+                                                    to={`/professor/${professor.id}?courseId=${courseId}`}
+                                                    className="hover:text-blue-500 flex items-center"
+                                                >
+                                                    {professor.name}
+                                                </Link>
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                <Rating>
+                                                    <Rating.Star />
+                                                    <p
+                                                        className={`ml-2 text-sm font-bold transition-colors duration-500 ${
+                                                            darkMode ? "text-white" : "text-gray-900"
+                                                        }`}
+                                                    >
+                                                        {professor.avgRating}
+                                                    </p>
+                                                </Rating>
+                                            </td>
+                                            <td className="px-4 py-2">{professor.avgDifficulty}</td>
+                                            <td className="px-4 py-2">
+                                                <a
+                                                    href={professor.link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    <img
+                                                        src={darkMode ? tagIconLight : tagIconDark }
+                                                        alt="Profile"
+                                                        className="inline-block h-5 w-5"
+                                                    />
+                                                </a>
+                                            </td>
+                                            <td className="px-4 py-2">{professor.avgGrade}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         )}
                     </div>
 
-                    {/* Right Section: Additional Info Box */}
                     <div className="w-1/3 pl-4">
-                        <div
-                            className={`p-4 rounded shadow-md transition-colors duration-500 ${
-                                darkMode ? "bg-gray-800 text-white" : "bg-gray-200 text-black"
-                            }`}
-                        >
+                        <div className={`p-4 rounded shadow-md ${darkMode ? "bg-gray-800" : "bg-gray-200"}`}>
                             <h3 className="text-xl font-semibold">Additional Information</h3>
                             {averageGrade ? (
                                 <p>
@@ -131,8 +276,7 @@ const CourseDetail = ({ darkMode }) => {
                                 <p>Loading average grade...</p>
                             )}
                             <p>
-                                Here you can add content for the right side of the page, such as notes, related links, or
-                                other components. This box is independent of the table and main content.
+                                Add any additional course-related content here.
                             </p>
                         </div>
                     </div>
@@ -143,8 +287,4 @@ const CourseDetail = ({ darkMode }) => {
 };
 
 export default CourseDetail;
-
-
-
-
 
