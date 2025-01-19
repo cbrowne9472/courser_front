@@ -80,11 +80,47 @@ export const getCommentsByProfessorId = async (professorId) => {
     }
 };
 
-
-export const getCourses = async (start = 0, limit = 10, sortBy = "courseNumber", order = "asc", searchQuery = "", subject = "") => {
+export const getProfessorRatings = async (professorId) => {
     try {
         const response = await axios.get(
-            `${API_BASE_URL}/courses?start=${start}&limit=${limit}&sortBy=${sortBy}&order=${order}&searchQuery=${searchQuery}&subject=${subject}`
+            `http://localhost:8080/prof_api/${professorId}/ratings`
+        );
+        return response.data; // Returns ProfessorRatingDTO
+    } catch (error) {
+        console.error("Error fetching professor ratings:", error);
+        return null;
+    }
+};
+
+
+export const getProfessorDetails = async (professorId) => {
+    try {
+        const response = await axios.get(
+            `http://localhost:8080/prof_api/professor/${professorId}/details`
+        );
+        return response.data; // Returns an object with "professor" and "comments"
+    } catch (error) {
+        console.error("Error fetching professor details:", error);
+        return { professor: null, comments: [] }; // Default response on error
+    }
+};
+
+export const searchCoursesAndProfessors = async (query) => {
+    try {
+        const response = await axios.get(
+            `http://localhost:8080/home/search?query=${query}`
+        );
+        return response.data; // Returns an object with "courses" and "professors"
+    } catch (error) {
+        console.error("Error searching for courses and professors:", error);
+        return { courses: [], professors: [] };
+    }
+};
+
+export const getCourses = async (start = 0, limit = 10, sortBy = "courseNumber", order = "asc", searchQuery = "", subject = "", level = "") => {
+    try {
+        const response = await axios.get(
+            `${API_BASE_URL}/courses?start=${start}&limit=${limit}&sortBy=${sortBy}&order=${order}&searchQuery=${searchQuery}&subject=${subject}&level=${level}`
         );
         return response.data;
     } catch (error) {
@@ -92,6 +128,7 @@ export const getCourses = async (start = 0, limit = 10, sortBy = "courseNumber",
         return [];
     }
 };
+
 
 export const getSubjects = async () => {
     try {

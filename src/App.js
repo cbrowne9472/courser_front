@@ -8,10 +8,12 @@ import CourseDetail from "./components/CourseDetail.js";
 import Login from "./components/Login.js";
 import SignUp from "./components/SignUp.js";
 import ProfessorComments from "./components/ProfessorComments.js";
+import LandingPage from "./components/LandingPage.js";
+import ProfessorDetails from "./components/ProfessorDetails.js";
+
 import "./index.css"; // Import Tailwind CSS
 
 const navigation = [
-    { name: "Home", href: "/", current: true },
     { name: "Courses", href: "/courses", current: false }
 
 ];
@@ -241,13 +243,14 @@ const App = () => {
 
                 <div className={`container mx-auto mt-6`}>
                     <Routes>
-                        <Route path="/" element={<h3>Welcome to Course Management</h3>} />
+                        <Route path="/" element={<LandingPage darkMode={darkMode} />} />
                         <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
                         <Route path="/signup" element={<SignUp />} />
                         <Route path="/courses" element={<CourseList key={refresh} darkMode={darkMode} />} />
                         <Route path="/add-course" element={<ProtectedRoute element={<AddCourseForm onCourseAdded={handleCourseAdded} />} />} />
                         <Route path="/courses/:courseId" element={<CourseDetail darkMode={darkMode} />} />
-                        <Route path="/professor/:professorId" element={<ProfessorComments darkMode={darkMode} />} />
+                        <Route path="/professors/:professorId" element={<ProfessorDetails darkMode={darkMode} />} />
+
                     </Routes>
                 </div>
             </Router>

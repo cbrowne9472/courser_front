@@ -16,10 +16,18 @@ const CourseList = ({ darkMode }) => {
     const [order, setOrder] = useState("asc");
     const [subjects, setSubjects] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState("");
+    const [selectedLevel, setSelectedLevel] = useState("1XX"); // Default to "1XX"
 
     const limit = 10;
 
-    const fetchCourses = async (reset = false, query = searchQuery, field = sortBy, direction = order, subject = selectedSubject) => {
+    const fetchCourses = async (
+        reset = false,
+        query = searchQuery,
+        field = sortBy,
+        direction = order,
+        subject = selectedSubject,
+        level = selectedLevel
+    ) => {
         if (reset) {
             setCourses([]);
             setStart(0);
@@ -27,7 +35,15 @@ const CourseList = ({ darkMode }) => {
         }
 
         try {
-            const newCourses = await getCourses(reset ? 0 : start, limit, field, direction, query, subject);
+            const newCourses = await getCourses(
+                reset ? 0 : start,
+                limit,
+                field,
+                direction,
+                query,
+                subject,
+                level
+            );
             setCourses((prev) => [...prev, ...newCourses]);
             if (newCourses.length < limit) {
                 setHasMore(false);
@@ -38,6 +54,8 @@ const CourseList = ({ darkMode }) => {
             console.error("Error fetching courses:", error);
         }
     };
+
+
 
     useEffect(() => {
         const initializeData = async () => {
@@ -182,6 +200,32 @@ const CourseList = ({ darkMode }) => {
                         }}
                     />
 
+                    <div className="flex space-x-2 mb-4">
+                        {["1XX", "2XX", "3XX", "4XX", "5XX", "6XX", "7XX"].map((level) => (
+                            <button
+                                key={level}
+                                onClick={() => {
+                                    setSelectedLevel(level); // Update selected level
+                                    fetchCourses(true, searchQuery, sortBy, order, selectedSubject, level); // Fetch courses
+                                }}
+                                className={`px-3 py-1 rounded transition-colors duration-500 ${
+                                    selectedLevel === level
+                                        ? darkMode
+                                            ? "bg-blue-700 text-white"
+                                            : "bg-blue-500 text-white"
+                                        : darkMode
+                                            ? "bg-gray-800 text-gray-300"
+                                            : "bg-gray-200 text-black"
+                                }`}
+                            >
+                                {level}
+                            </button>
+                        ))}
+                    </div>
+
+
+
+
 
                 </div>
                 <InfiniteScroll
@@ -204,7 +248,6 @@ const CourseList = ({ darkMode }) => {
                                     </Link>
                                 </h5>
                                 <p>{course.description}</p>
-                                <p className="text-sm">Subject: {course.subject}</p>
                             </div>
                         ))}
                     </div>

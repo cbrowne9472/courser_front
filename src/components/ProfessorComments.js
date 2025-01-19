@@ -50,6 +50,7 @@ const ProfessorComments = ({ darkMode }) => {
     };
 
     return (
+        <div className="transform scale-60">
         <div
             className={`min-h-screen px-4 py-6 transition-colors duration-500 ${
                 darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
@@ -101,6 +102,7 @@ const ProfessorComments = ({ darkMode }) => {
                     </div>
                 )}
             </div>
+        </div>
         </div>
     );
 };
