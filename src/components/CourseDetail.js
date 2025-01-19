@@ -43,6 +43,8 @@ const CourseDetail = ({ darkMode }) => {
         const fetchCourseDetails = async () => {
             const courseData = await getCourseById(courseId);
             setCourse(courseData);
+            
+            console.log(courseData);
 
             const professorsData = await getProfessorsByCourseId(courseId);
             const averageGrades = await getAverageGradesByProfessor(courseId);
@@ -129,8 +131,8 @@ const CourseDetail = ({ darkMode }) => {
                         }`}
                     >
                         <h2 className="text-2xl font-bold mb-4">{course.title}</h2>
-                        <p className="mb-2"><strong>Rating:</strong> {course.rating}</p>
-                        <p className="mb-2"><strong>Course ID:</strong> {course.id}</p>
+                        {/*<p className="mb-2"><strong>Rating:</strong> {course.rating}</p>*/}
+                        {/*<p className="mb-2"><strong>Course ID:</strong> {course.id}</p>*/}
                         <p className="mb-2">{course.description}</p>
                         <p>{course.additionalInfo}</p>
                     </div>
@@ -439,14 +441,14 @@ const CourseDetail = ({ darkMode }) => {
                             <h3 className="text-xl font-semibold">Additional Information</h3>
                             {averageGrade ? (
                                 <p>
-                                    <strong>Average Grade:</strong> {averageGrade}
+                                    <strong>Average Grade for {course.courseName}:</strong> {averageGrade}
                                 </p>
                             ) : (
                                 <p>Loading average grade...</p>
                             )}
-                            <p>
-                                Add any additional course-related content here.
-                            </p>
+                            {/*<p>*/}
+                            {/*    Add any additional course-related content here.*/}
+                            {/*</p>*/}
                         </div>
                     </div>
                 </div>
