@@ -65,6 +65,52 @@ const ProfessorDetails = ({ darkMode }) => {
         return <p>Loading...</p>;
     }
 
+    const renderPageNumbers = () => {
+        const pageNumbers = [];
+        const rangeStart = Math.max(1, currentPage - 2);
+        const rangeEnd = Math.min(totalPages, currentPage + 2);
+
+        for (let i = rangeStart; i <= rangeEnd; i++) {
+            pageNumbers.push(
+                <button
+                    key={i}
+                    onClick={() => handlePageChange(i)}
+                    className={`px-2 py-1 border rounded-full ${
+                        currentPage === i
+                            ? darkMode ? "bg-gray-800 text-white" : "bg-gray-500 text-white"
+                            : darkMode ? "bg-gray-700 text-gray-300" : "bg-gray-300 text-black"
+                    }`}
+                >
+                    {i}
+                </button>
+            );
+        }
+
+        return (
+            <>
+                {rangeStart > 1 && (
+                    <button
+                        onClick={() => handlePageChange(1)}
+                        className="px-2 py-1 border rounded-full bg-gray-300 text-black"
+                    >
+                        1
+                    </button>
+                )}
+                {rangeStart > 2 && <span className="px-2 py-1">...</span>}
+                {pageNumbers}
+                {rangeEnd < totalPages - 1 && <span className="px-2 py-1">...</span>}
+                {rangeEnd < totalPages && (
+                    <button
+                        onClick={() => handlePageChange(totalPages)}
+                        className="px-2 py-1 border rounded-full bg-gray-300 text-black"
+                    >
+                        {totalPages}
+                    </button>
+                )}
+            </>
+        );
+    };
+
     return (
         <div className={`min-h-screen p-4 ${darkMode ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
             <div className={`max-w-6xl mx-auto rounded-lg shadow-md p-4 flex justify-between items-center ${darkMode ? "bg-gray-800 text-gray-300" : "bg-white text-gray-700"}`}>
@@ -228,26 +274,7 @@ const ProfessorDetails = ({ darkMode }) => {
                                     &lt;
                                 </button>
                             )}
-                            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
-                                <button
-                                    key={i + 1}
-                                    onClick={() => handlePageChange(i + 1)}
-                                    className={`px-2 py-1 border rounded-full ${
-                                        currentPage === i + 1
-                                            ? darkMode
-                                                ? "bg-gray-800 text-white"
-                                                : "bg-gray-500 text-white"
-                                            : darkMode
-                                                ? "bg-gray-700 text-gray-300"
-                                                : "bg-gray-300 text-black"
-                                    }`}
-                                >
-                                    {i + 1}
-                                </button>
-                            ))}
-                            {totalPages > 5 && (
-                                <span className="px-2 py-1 border rounded-full bg-gray-800 text-gray-400">...</span>
-                            )}
+                            {renderPageNumbers()}
                             {currentPage < totalPages && (
                                 <button
                                     onClick={() => handlePageChange(currentPage + 1)}
@@ -261,6 +288,7 @@ const ProfessorDetails = ({ darkMode }) => {
                         </nav>
                     </div>
                 )}
+
             </div>
         </div>
     );

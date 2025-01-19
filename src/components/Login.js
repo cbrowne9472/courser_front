@@ -7,15 +7,20 @@ const Login = ({ setIsLoggedIn }) => {
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
+
+    const API_BASE_URL = `${process.env.REACT_APP_API_URL}`;
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
             const response = await axios.post(
-                "http://localhost:8080/auth/authenticate",
+                `${API_BASE_URL}/auth/authenticate`,
                 { username, password },
                 { headers: { "Content-Type": "application/json" } }
             );
+            
+            console.log(response);
 
             localStorage.setItem("token", response.data); // Save JWT token
             setIsLoggedIn(true); // Update login state

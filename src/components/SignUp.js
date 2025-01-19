@@ -6,10 +6,13 @@ const SignUp = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    const API_BASE_URL = `${process.env.REACT_APP_API_URL}`;
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
         try {
-            await axios.post("http://localhost:8080/auth/register/user", {
+            await axios.post(`${API_BASE_URL}/auth/register/user`, {
                 username,
                 email,
                 password,

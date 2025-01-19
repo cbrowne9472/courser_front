@@ -57,20 +57,35 @@ const LandingPage = ({ darkMode }) => {
                     }`}
                     placeholder="Search for courses or professors"
                 />
+                <p
+                    className={`text-sm font-medium mb-2 ${
+                        darkMode ? "text-gray-400" : "text-gray-600"
+                    }`}
+                >
+                    e.g. CS 112, Brent Gorbutt
+                </p>
                 {debouncedQuery && (
                     <div
-                        className={`absolute top-16 left-0 w-full bg-white shadow-lg rounded-md max-h-64 overflow-y-auto ${
-                            darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+                        className={`absolute top-16 left-0 w-full shadow-lg rounded-md max-h-64 overflow-y-auto transition-colors duration-500 ${
+                            darkMode ? "bg-gray-800 text-white border-gray-700" : "bg-white text-black border-gray-300"
                         }`}
                     >
                         {results.courses.length > 0 && (
                             <div>
-                                <h3 className="px-4 py-2 text-sm font-bold">Courses</h3>
+                                <h3
+                                    className={`px-4 py-2 text-sm font-bold border-b transition-colors ${
+                                        darkMode ? "border-gray-700" : "border-gray-300"
+                                    }`}
+                                >
+                                    Courses
+                                </h3>
                                 <ul>
                                     {results.courses.map((course) => (
                                         <li
                                             key={course.id}
-                                            className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                                            className={`px-4 py-2 cursor-pointer transition-colors duration-500 ${
+                                                darkMode ? "hover:bg-gray-700" : "hover:bg-gray-200"
+                                            }`}
                                         >
                                             <Link to={`/courses/${course.id}`}>
                                                 {course.title}
@@ -82,12 +97,20 @@ const LandingPage = ({ darkMode }) => {
                         )}
                         {results.professors.length > 0 && (
                             <div>
-                                <h3 className="px-4 py-2 text-sm font-bold">Professors</h3>
+                                <h3
+                                    className={`px-4 py-2 text-sm font-bold border-b transition-colors duration-500 ${
+                                        darkMode ? "border-gray-700" : "border-gray-300"
+                                    }`}
+                                >
+                                    Professors
+                                </h3>
                                 <ul>
                                     {results.professors.map((professor) => (
                                         <li
                                             key={professor.id}
-                                            className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                                            className={`px-4 py-2 cursor-pointer transition-colors ${
+                                                darkMode ? "hover:bg-gray-700" : "hover:bg-gray-200"
+                                            }`}
                                         >
                                             <Link to={`/professors/${professor.id}`}>
                                                 {professor.name}
@@ -101,11 +124,11 @@ const LandingPage = ({ darkMode }) => {
                 )}
                 <Link
                     to="/courses"
-                    className={`px-6 py-2 text-lg font-medium rounded transition-colors duration-500 hover:underline ${
-                        darkMode ? "bg-blue-700 text-white" : "bg-blue-500 text-white"
+                    className={`text-sm font-medium transition-colors duration-500 ${
+                        darkMode ? "text-blue-300 hover:text-blue-400" : "text-blue-700 hover:text-blue-800"
                     }`}
                 >
-                    Explore All Courses →
+                    or explore all courses →
                 </Link>
             </div>
         </div>
@@ -113,7 +136,3 @@ const LandingPage = ({ darkMode }) => {
 };
 
 export default LandingPage;
-
-
-
-

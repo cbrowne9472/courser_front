@@ -16,7 +16,7 @@ const CourseList = ({ darkMode }) => {
     const [order, setOrder] = useState("asc");
     const [subjects, setSubjects] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState("");
-    const [selectedLevel, setSelectedLevel] = useState("1XX"); // Default to "1XX"
+    const [selectedLevel, setSelectedLevel] = useState("");
 
     const limit = 10;
 
@@ -55,8 +55,6 @@ const CourseList = ({ darkMode }) => {
         }
     };
 
-
-
     useEffect(() => {
         const initializeData = async () => {
             await fetchCourses(true);
@@ -69,20 +67,30 @@ const CourseList = ({ darkMode }) => {
     const handleSearch = (event) => {
         const query = event.target.value;
         setSearchQuery(query);
-        fetchCourses(true, query, sortBy, order, selectedSubject);
+        fetchCourses(true, query, sortBy, order, selectedSubject, selectedLevel);
     };
 
     const handleSort = (option) => {
         const [field, direction] = option.value.split("-");
         setSortBy(field);
         setOrder(direction);
-        fetchCourses(true, searchQuery, field, direction, selectedSubject);
+        fetchCourses(true, searchQuery, field, direction, selectedSubject, selectedLevel);
     };
 
     const handleSubjectChange = (option) => {
         const subject = option ? option.value : "";
         setSelectedSubject(subject);
-        fetchCourses(true, searchQuery, sortBy, order, subject);
+        fetchCourses(true, searchQuery, sortBy, order, subject, selectedLevel);
+    };
+
+    const handleLevelChange = (level) => {
+        setSelectedLevel(level);
+        fetchCourses(true, searchQuery, sortBy, order, selectedSubject, level);
+    };
+
+    const handleAllCourses = () => {
+        setSelectedLevel("");
+        fetchCourses(true, searchQuery, sortBy, order, selectedSubject, "");
     };
 
     return (
@@ -152,7 +160,6 @@ const CourseList = ({ darkMode }) => {
                         }}
                     />
 
-
                     <Select
                         components={animatedComponents}
                         options={subjects}
@@ -201,18 +208,21 @@ const CourseList = ({ darkMode }) => {
                     />
 
                     <div className="flex space-x-2 mb-4">
-                        {["1XX", "2XX", "3XX", "4XX", "5XX", "6XX", "7XX"].map((level) => (
+                        {[
+                            "1XX",
+                            "2XX",
+                            "3XX",
+                            "4XX",
+                            "5XX",
+                            "6XX",
+                            "7XX",
+                        ].map((level) => (
                             <button
                                 key={level}
-                                onClick={() => {
-                                    setSelectedLevel(level); // Update selected level
-                                    fetchCourses(true, searchQuery, sortBy, order, selectedSubject, level); // Fetch courses
-                                }}
+                                onClick={() => handleLevelChange(level)}
                                 className={`px-3 py-1 rounded transition-colors duration-500 ${
                                     selectedLevel === level
-                                        ? darkMode
-                                            ? "bg-blue-700 text-white"
-                                            : "bg-blue-500 text-white"
+                                        ? "bg-blue-500 text-white"
                                         : darkMode
                                             ? "bg-gray-800 text-gray-300"
                                             : "bg-gray-200 text-black"
@@ -221,13 +231,21 @@ const CourseList = ({ darkMode }) => {
                                 {level}
                             </button>
                         ))}
+                        <button
+                            onClick={handleAllCourses}
+                            className={`px-3 py-1 rounded transition-colors duration-500 ${
+                                selectedLevel === ""
+                                    ? "bg-blue-500 text-white"
+                                    : darkMode
+                                        ? "bg-gray-800 text-gray-300"
+                                        : "bg-gray-200 text-black"
+                            }`}
+                        >
+                            XXX
+                        </button>
                     </div>
-
-
-
-
-
                 </div>
+
                 <InfiniteScroll
                     dataLength={courses.length}
                     next={() => fetchCourses()}
@@ -243,7 +261,10 @@ const CourseList = ({ darkMode }) => {
                                 }`}
                             >
                                 <h5 className="font-bold">
-                                    <Link to={`/courses/${course.id}`} className="hover:underline">
+                                    <Link
+                                        to={`/courses/${course.id}`}
+                                        className="hover:underline"
+                                    >
                                         {course.title}
                                     </Link>
                                 </h5>
@@ -258,3 +279,4 @@ const CourseList = ({ darkMode }) => {
 };
 
 export default CourseList;
+
